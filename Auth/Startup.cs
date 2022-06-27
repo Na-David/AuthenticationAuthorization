@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,6 +18,7 @@ namespace Auth
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication("Cookies").AddCookie();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,6 +46,12 @@ namespace Auth
                     {
                         new Claim(ClaimTypes.Name, "Aaron")
                     };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
+
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    await context.SignInAsync("Cookies", claimsPrincipal);
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync("<h3>Login Successful</h3>");
