@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Auth
@@ -30,6 +31,7 @@ namespace Auth
             }
 
             app.UseRouting();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
@@ -55,6 +57,24 @@ namespace Auth
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync("<h3>Login Successful</h3>");
+                });
+
+                endpoints.MapGet("/Info", async context =>
+                {
+                    string result = "";
+
+                    if (context.User.Identity.IsAuthenticated)
+                    {
+                        result += $"<h3>Login Name : {context.User.Identity.Name}</h3>";
+                    }
+                    else
+                    {
+                        result += "Login Failed";
+                    }
+
+                    context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
+                    await context.Response.WriteAsync(result, Encoding.Default);
+
                 });
             });
         }
