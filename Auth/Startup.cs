@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Auth
@@ -38,6 +40,11 @@ namespace Auth
                 endpoints.MapGet("/", async context =>
                 {
                     string content = "<h1>ASP.NET Core Authorization & Authentication æ»≥Á«œººø‰</h1>";
+
+                    content += "<a href=\"/Login\">Login</a> <br />";
+                    content += "<a href=\"/Info\">Information</a> <br />";
+                    content += "<a href=\"/InfoJson\">Json</a> <br />";
+
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync(content);
                 });
@@ -59,24 +66,54 @@ namespace Auth
                     await context.Response.WriteAsync("<h3>Login Successful</h3>");
                 });
 
+                #region Info
                 endpoints.MapGet("/Info", async context =>
+        {
+            string result = "";
+
+            if (context.User.Identity.IsAuthenticated)
+            {
+                result += $"<h3>Login Name : {context.User.Identity.Name}</h3>";
+            }
+            else
+            {
+                result += "Login Failed";
+            }
+
+            context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
+            await context.Response.WriteAsync(result, Encoding.Default);
+
+        });
+                #endregion
+
+                #region InfoJson
+                endpoints.MapGet("/InfoJson", async context =>
                 {
-                    string result = "";
+                    string json = "";
 
                     if (context.User.Identity.IsAuthenticated)
                     {
-                        result += $"<h3>Login Name : {context.User.Identity.Name}</h3>";
+                        //json += "{ \"Type\" : \"Name\", \"Value\" : \"User Name\"}";
+                        var claims = context.User.Claims.Select(c => new ClaimDto { Type = c.Type, Value = c.Value});
+                        json += JsonSerializer.Serialize<IEnumerable<ClaimDto>>(claims, new JsonSerializerOptions {Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping });
                     }
                     else
                     {
-                        result += "Login Failed";
+                        json += "{ }";
                     }
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
-                    await context.Response.WriteAsync(result, Encoding.Default);
+                    await context.Response.WriteAsync(json);
 
                 });
+                #endregion
             });
         }
+    }
+
+    public class ClaimDto //Data Transfer Object
+    {
+        public string Type { get; set; }
+        public string Value { get; set; }
     }
 }
