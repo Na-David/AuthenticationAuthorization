@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -57,11 +58,11 @@ namespace Auth
                         new Claim(ClaimTypes.Name, "Aaron")
                     };
 
-                    var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-                    await context.SignInAsync("Cookies", claimsPrincipal);
+                    await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync("<h3>Login Successful</h3>");
@@ -109,13 +110,15 @@ namespace Auth
                 });
                 #endregion
 
+                #region Logout
                 endpoints.MapGet("/Logout", async context =>
                 {
-                    await context.SignOutAsync("Cookies");
+                    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync("<h3>Successfulyl Logged out</h3>");
-                });
+                }); 
+                #endregion
             });
         }
     }
