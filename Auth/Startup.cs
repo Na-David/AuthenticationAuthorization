@@ -44,6 +44,7 @@ namespace Auth
                     content += "<a href=\"/Login\">Login</a> <br />";
                     content += "<a href=\"/Info\">Information</a> <br />";
                     content += "<a href=\"/InfoJson\">Json</a> <br />";
+                    content += "<a href=\"/Logout\">Logout</a> <br />";
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync(content);
@@ -101,12 +102,20 @@ namespace Auth
                     {
                         json += "{ }";
                     }
-
-                    context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
+                    //text/html //// application/json == mime type
+                    context.Response.Headers["Content-Type"] = "application/json; charset = utf-8";
                     await context.Response.WriteAsync(json);
 
                 });
                 #endregion
+
+                endpoints.MapGet("/Logout", async context =>
+                {
+                    await context.SignOutAsync("Cookies");
+
+                    context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
+                    await context.Response.WriteAsync("<h3>Successfulyl Logged out</h3>");
+                });
             });
         }
     }
