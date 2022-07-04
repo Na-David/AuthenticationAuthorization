@@ -57,7 +57,7 @@ namespace Auth
                     {
                         new Claim(ClaimTypes.Name, "Aaron")
                     };
-
+                    //var claimsIdentity = new ClaimsIdentity(claims, "cookies");
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
