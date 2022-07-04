@@ -38,12 +38,16 @@ namespace Auth
 
             app.UseEndpoints(endpoints =>
             {
+                #region Menu
                 endpoints.MapGet("/", async context =>
                 {
                     string content = "<h1>ASP.NET Core Authorization & Authentication æ»≥Á«œººø‰</h1>";
 
                     content += "<a href=\"/Login\">Login</a> <br />";
+                    content += "<a href=\"/Login/User\">Login(User)</a> <br />";
+                    content += "<a href=\"/Login/Admin\">Login(Admin)</a> <br />";
                     content += "<a href=\"/Info\">Information</a> <br />";
+                    content += "<a href=\"/InfoDetails\">Information(Details)</a> <br />";
                     content += "<a href=\"/InfoJson\">Json</a> <br />";
                     content += "<a href=\"/Logout\">Logout</a> <br />";
 
@@ -51,13 +55,16 @@ namespace Auth
                     await context.Response.WriteAsync(content);
                 });
 
+                #endregion
+
+                #region Login
                 endpoints.MapGet("/Login", async context =>
                 {
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, "Aaron")
+                                new Claim(ClaimTypes.Name, "Aaron")
                     };
-                    //var claimsIdentity = new ClaimsIdentity(claims, "cookies");
+                            //var claimsIdentity = new ClaimsIdentity(claims, "cookies");
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
@@ -67,25 +74,85 @@ namespace Auth
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync("<h3>Login Successful</h3>");
                 });
+                #endregion
+
+                #region /Login/{Username}
+                endpoints.MapGet("/Login/{Username}", async context =>
+                {
+                    var username = context.Request.RouteValues["Username"].ToString(); // taking the token value into username
+                    var claims = new List<Claim>
+                    {
+                                new Claim(ClaimTypes.Name, username),
+                                new Claim(ClaimTypes.Email, username + "@naver.com"),
+                                new Claim(ClaimTypes.Role, "Users"),
+                                new Claim("Any name", "Any Value")
+                    };
+
+                    if (username == "Admin")
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                    }
+                            //var claimsIdentity = new ClaimsIdentity(claims, "cookies");
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                    await context.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        claimsPrincipal,
+                        new AuthenticationProperties { IsPersistent = true }); // when we close web browser, this cookie still exists. if the value is false, then that cookie will be dissappear.
+
+                    context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
+                    await context.Response.WriteAsync("<h3>Login Successful</h3>");
+                });
+                #endregion
+
+                #region InfoDetails
+                endpoints.MapGet("/InfoDetails", async context =>
+                {
+                    string result = "";
+
+                    if (context.User.Identity.IsAuthenticated)
+                    {
+                        result += $"<h3>Login Name : {context.User.Identity.Name}</h3>";
+                        foreach (var claim in context.User.Claims)
+                        {
+                            result += $"{claim.Type} = {claim.Value} <br />";
+                        }
+                        if (context.User.IsInRole("Admin") && context.User.IsInRole("Users"))//if this token has those two conditions,
+                        {
+                            result += "<br />Authorization details : Administrators + Users";
+                        }
+                    }
+                    else
+                    {
+                        result += "Login Failed";
+                    }
+
+                    context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
+                    await context.Response.WriteAsync(result, Encoding.Default);
+
+                }); 
+                #endregion
 
                 #region Info
                 endpoints.MapGet("/Info", async context =>
-        {
-            string result = "";
+                {
+                    string result = "";
 
-            if (context.User.Identity.IsAuthenticated)
-            {
-                result += $"<h3>Login Name : {context.User.Identity.Name}</h3>";
-            }
-            else
-            {
-                result += "Login Failed";
-            }
+                    if (context.User.Identity.IsAuthenticated)
+                    {
+                        result += $"<h3>Login Name : {context.User.Identity.Name}</h3>";
+                    }
+                    else
+                    {
+                        result += "Login Failed";
+                    }
 
-            context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
-            await context.Response.WriteAsync(result, Encoding.Default);
+                    context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
+                    await context.Response.WriteAsync(result, Encoding.Default);
 
-        });
+                });
                 #endregion
 
                 #region InfoJson
