@@ -83,8 +83,9 @@ namespace Auth
                     var claims = new List<Claim>
                     {
                                 new Claim(ClaimTypes.Name, username),
+                                new Claim(ClaimTypes.NameIdentifier, username),
                                 new Claim(ClaimTypes.Email, username + "@naver.com"),
-                                new Claim(ClaimTypes.Role, "Users"),
+                                new Claim(ClaimTypes.Role, "User"),
                                 new Claim("Any name", "Any Value")
                     };
 
@@ -119,9 +120,9 @@ namespace Auth
                         {
                             result += $"{claim.Type} = {claim.Value} <br />";
                         }
-                        if (context.User.IsInRole("Admin") && context.User.IsInRole("Users"))//if this token has those two conditions,
+                        if (context.User.IsInRole("Admin") && context.User.IsInRole("User"))//if this token has those two conditions,
                         {
-                            result += "<br />Authorization details : Administrators + Users";
+                            result += "<br />Authorization details : Administrator + User";
                         }
                     }
                     else
