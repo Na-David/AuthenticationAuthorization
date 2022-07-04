@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -24,6 +26,9 @@ namespace Auth
         {
             //services.AddAuthentication("Cookies").AddCookie();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+
+            //services.AddMvc();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -33,12 +38,15 @@ namespace Auth
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            //MiddleWare
             app.UseRouting();
             app.UseAuthentication();
+            app.UseAuthorization(); // To use Authorize
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapDefaultControllerRoute(); // To use MVC, Need to be added
+
                 #region Menu
                 endpoints.MapGet("/", async context =>
                 {
@@ -51,6 +59,9 @@ namespace Auth
                     content += "<a href=\"/InfoDetails\">Information(Details)</a> <br />";
                     content += "<a href=\"/InfoJson\">Json</a> <br />";
                     content += "<a href=\"/Logout\">Logout</a> <br />";
+                    content += "<hr><a href=\"/Landing/Index\">Landing Page</a> <br />";
+                    content += "<a href=\"/Greeting\">Greeting</a> <br />";
+                    content += "<a href=\"/Dashboard\">Dashboard</a> <br />";
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync(content);
@@ -199,4 +210,26 @@ namespace Auth
     }
 
 
+    #region MVC Controller
+    //MVC Model
+    [AllowAnonymous]
+    public class LandingController : Controller
+    {
+        public IActionResult Index() => Content("Anyone can get an access");
+
+        [Authorize]//Greeting page will not open to anyone. Unless the user is logged on
+        [Route("/Greeting")]
+        public IActionResult Greeting()
+        {
+            var roleName = HttpContext.User.IsInRole("Admin") ? "Administrator" : "User";
+            return Content($"Hello, <em>{roleName}</em>", "text/html", Encoding.Default);
+        }
+    }
+
+    [Authorize(Roles = "Admin")] // Onle Admin Role can get an access
+    public class DashboardController : Controller
+    {
+        public IActionResult Index() => Content("Hello, Admin.");
+    } 
+    #endregion
 }
