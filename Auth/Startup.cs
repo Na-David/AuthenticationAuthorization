@@ -62,6 +62,7 @@ namespace Auth
                     content += "<hr><a href=\"/Landing/Index\">Landing Page</a> <br />";
                     content += "<a href=\"/Greeting\">Greeting</a> <br />";
                     content += "<a href=\"/Dashboard\">Dashboard</a> <br />";
+                    content += "<a href=\"/api/AuthService\">Login Info(Json)</a> <br />";
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync(content);
@@ -203,11 +204,13 @@ namespace Auth
         }
     }
 
+    #region Data Transfer Object
     public class ClaimDto //Data Transfer Object
     {
         public string Type { get; set; }
         public string Value { get; set; }
-    }
+    } 
+    #endregion
 
 
     #region MVC Controller
@@ -230,6 +233,18 @@ namespace Auth
     public class DashboardController : Controller
     {
         public IActionResult Index() => Content("Hello, Admin.");
+    }
+    #endregion
+
+    #region Web API Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthServiceController : ControllerBase
+    {
+        [Authorize]
+        [HttpGet]
+        public IEnumerable<ClaimDto> Get() =>
+            HttpContext.User.Claims.Select(c => new ClaimDto { Type = c.Type, Value = c.Value });
     } 
     #endregion
 }
