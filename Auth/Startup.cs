@@ -59,7 +59,7 @@ namespace Auth
                     content += "<hr><a href=\"/Landing/Index\">Landing Page</a> <br />";
                     content += "<a href=\"/Greeting\">Greeting</a> <br />";
                     content += "<a href=\"/Dashboard\">Dashboard</a> <br />";
-                    content += "<a href=\"/api/AuthService\">Login Info(Json)</a> <br />";
+                    content += "<hr><a href=\"/api/AuthService\">Login Info(Json)</a> <br />";
 
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync(content);
