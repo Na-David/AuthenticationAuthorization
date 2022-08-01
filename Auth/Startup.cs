@@ -49,6 +49,7 @@ namespace Auth
                 {
                     string content = "<h1>ASP.NET Core Authorization & Authentication æ»≥Á«œººø‰</h1>";
 
+                    #region LinkList
                     content += "<a href=\"/Login\">Login</a> <br />";
                     content += "<a href=\"/Login/User\">Login(User)</a> <br />";
                     content += "<a href=\"/Login/Admin\">Login(Admin)</a> <br />";
@@ -61,6 +62,7 @@ namespace Auth
                     content += "<a href=\"/Dashboard\">Dashboard</a> <br />";
                     content += "<hr><a href=\"/api/AuthService\">Login Info(Json)</a> <br />";
 
+                    #endregion
                     context.Response.Headers["Content-Type"] = "text/html; charset = utf-8";
                     await context.Response.WriteAsync(content);
                 });
